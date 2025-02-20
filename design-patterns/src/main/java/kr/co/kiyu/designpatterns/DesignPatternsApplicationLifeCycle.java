@@ -1,32 +1,29 @@
-package kr.co.kiyu.datafeed;
+package kr.co.kiyu.designpatterns;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.springframework.stereotype.Component;
 
-import kr.co.kiyu.datafeed.api.client.bybit.BybitApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 데이터피드 애플리케이션 생명주기
+ * 디자인패턴 애플리케이션 생명주기
  * @author KIYU-IT
- * @date 2025. 2. 11.
+ * @date 2025. 2. 20.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DataFeedApplicationLifeCycle {
-
-	private final BybitApiClient api = new BybitApiClient();
+public class DesignPatternsApplicationLifeCycle {
 
     /**
 	 * Spring Bean이 생성된 후 실행
 	 */
     @PostConstruct
     public void onInit() {
-    	this.api.onInit();
+    	log.info("디자인패턴의 세계로!");
     }
 
     /**
