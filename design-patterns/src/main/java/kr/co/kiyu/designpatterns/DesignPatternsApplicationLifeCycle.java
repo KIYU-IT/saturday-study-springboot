@@ -3,6 +3,8 @@ package kr.co.kiyu.designpatterns;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -16,15 +18,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DesignPatternsApplicationLifeCycle {
+public class DesignPatternsApplicationLifeCycle implements ApplicationRunner {
 
     /**
 	 * Spring Bean이 생성된 후 실행
 	 */
     @PostConstruct
     public void onInit() {
-    	log.info("디자인패턴의 세계로!");
+
     }
+
+    /**
+	 * 애플리케이션이 완전히 시작된 후 실행
+	 */
+    @Override
+	public void run(ApplicationArguments args) throws Exception {
+		log.info("디자인패턴의 세계로!!!");
+	}
 
     /**
 	 * Spring 애플리케이션이 종료되기 전에 호출
