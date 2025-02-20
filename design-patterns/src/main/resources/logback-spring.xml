@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+	<contextName>${HOSTNAME}</contextName>
+	<property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %magenta(%contextName) --- [%thread{10}] %cyan(%logger{30}) : %msg%n" />
+	<property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %contextName --- [%thread{10}] %logger{30} : %msg%n" />
+	<property name="FILE_NAME" value="design-patterns-${hostName}" />
+	<property name="ERROR_FILE_NAME" value="design-patterns-error-${hostName}" />
+	<property name="API_FILE_NAME" value="design-patterns-api-${hostName}" />
+
+	<springProfile name="default">
+		<property name="LOG_PATH" value="./logs" />
+	</springProfile>
+
+	<springProfile name="dev | stage | prod">
+		<property name="LOG_PATH" value="/app/data/logs/design-patterns/" />
+	</springProfile>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_PATH}/${FILE_NAME}.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_PATH}/${FILE_NAME}.log-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+			<maxHistory>50</maxHistory>
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_PATH}/${ERROR_FILE_NAME}.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_PATH}/${ERROR_FILE_NAME}.log-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+			<maxHistory>50</maxHistory>
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>WARN</level>
+		</filter>
+	</appender>
+
+	<appender name="FILE_API" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_PATH}/${API_FILE_NAME}.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_PATH}/${API_FILE_NAME}.log-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+			<maxHistory>50</maxHistory>
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="FILE_ERROR" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+	<logger name="org.springframework" additivity="false">
+		<level value="WARN" />
+		<appender-ref ref="FILE" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="org.springframework.transaction" level="DEBUG" additivity="false">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="jdbc.sqlonly" level="OFF"/>
+	<logger name="jdbc.sqltiming" level="DEBUG"/>
+	<logger name="jdbc.audit" level="OFF"/>
+	<logger name="jdbc.resultset" level="OFF"/>
+	<logger name="jdbc.resultsettable" level="OFF"/>
+	<logger name="jdbc.connection" level="OFF"/>
+
+	<!--
+		Log Level을 고려하여 DEBUG logger 위치를 ERROR logger 후위로 변경
+		* Log Level : TRACE < DEBUG < INFO < WARN < ERROR
+	-->
+	<logger name="kr.co.kiyu" level="DEBUG" additivity="false">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="FILE_ERROR" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="org.springframework" additivity="false">
+		<level value="WARN" />
+		<appender-ref ref="FILE_ERROR" />
+	</logger>
+
+	<logger name="kr.co.kiyu.common.api.logging" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="FILE_API" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+</configuration>
