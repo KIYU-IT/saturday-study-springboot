@@ -29,10 +29,16 @@ public class SubwaySandwichOrder {
 
 	private final SubwaySandwichService subwaySandwichService;
 
-	@Operation(summary = "서브웨이 샌드위치 주문", description = "서브웨이 샌드위치 주문")
-	@GetMapping("/order")
-	public String order(HttpServletRequest request) {
-        return this.subwaySandwichService.buildSandwich();
+	@Operation(summary = "서브웨이 샌드위치 - 치킨데리야끼 주문", description = "서브웨이 샌드위치 - 치킨데리야끼 주문")
+	@GetMapping("/order/chickenTeriyaki")
+	public String chickenTeriyaki(HttpServletRequest request) {
+        return this.subwaySandwichService.buildChickenTeriyaki();
+	}
+
+	@Operation(summary = "서브웨이 샌드위치 - 베지딜라이트 주문", description = "서브웨이 샌드위치 - 베지딜라이트 주문")
+	@GetMapping("/order/veggieDelight")
+	public String veggieDelight(HttpServletRequest request) {
+        return this.subwaySandwichService.buildVeggieDelight();
 	}
 
 }

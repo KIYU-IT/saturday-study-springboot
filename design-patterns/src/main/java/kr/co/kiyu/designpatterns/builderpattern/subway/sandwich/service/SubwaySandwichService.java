@@ -23,11 +23,13 @@ public class SubwaySandwichService {
 	private final SandwichDirector sandwichDirector;
 	private final SubwaySandwichBuilder subwaySandwichBuilder;
 
-	public String buildSandwich() {
-
-        // 샌드위치 조합 생성 (예: 치킨 데리야끼 샌드위치)
+	public String buildChickenTeriyaki() {
         SandwichDTO sandwich = sandwichDirector.buildChickenTeriyaki(subwaySandwichBuilder);
+        return sandwich.toHtmlContent();
+    }
 
+	public String buildVeggieDelight() {
+        SandwichDTO sandwich = sandwichDirector.buildVeggieDelight(subwaySandwichBuilder);
         return sandwich.toHtmlContent();
     }
 
