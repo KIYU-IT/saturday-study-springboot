@@ -43,59 +43,81 @@ public class SandwichDTO {
 	/**
      * 샌드위치 구성 요소를 HTML 형식의 문자열로 반환한다.
      */
-    public String toHtmlContent() {
-        StringBuilder html = new StringBuilder();
+	public String toHtmlContent() {
+	    StringBuilder html = new StringBuilder();
 
-        html.append("<div style='font-family: Arial, sans-serif; line-height: 1.6;'>");
+	    // CSS 스타일 선언
+	    html.append("<style>")
+	        .append("body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }")
+	        .append(".container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }")
+	        .append(".title { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 20px; color: #333; }")
+	        .append(".section { margin-bottom: 15px; padding: 10px; border-radius: 5px; background: #f9f9f9; }")
+	        .append(".section h3 { margin: 0; font-size: 18px; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px; }")
+	        .append(".section ul { list-style: none; padding: 0; }")
+	        .append(".section li { padding: 5px 0; font-size: 16px; color: #555; }")
+	        .append(".icon { margin-right: 8px; font-weight: bold; }")
+	        .append("</style>");
 
-        // 빵 종류
-        html.append("<h2>주문하신 샌드위치 구성 요소를 안내해드립니다.</h2>");
-        html.append("<p><strong>빵:</strong> ").append(bread != null ? bread.getBread() : "선택되지 않음").append("</p>");
+	    // HTML 컨테이너 시작
+	    html.append("<div class='container'>")
+	        .append("<div class='title'>🍽️ 주문하신 샌드위치 구성</div>");
 
-        // 치즈 종류 및 수량
-        html.append("<p><strong>치즈:</strong></p>");
-        if (cheeses != null && !cheeses.isEmpty()) {
-            html.append("<ul>");
-            for (Map.Entry<CheeseType, Integer> entry : cheeses.entrySet()) {
-                html.append("<li>")
-                    .append(entry.getKey().getCheese())
-                    .append(" - ")
-                    .append(entry.getValue())
-                    .append("장")
-                    .append("</li>");
-            }
-            html.append("</ul>");
-        } else {
-            html.append("<p>선택되지 않음</p>");
-        }
+	    // 빵 종류
+	    html.append("<div class='section'>")
+	        .append("<h3>🥖 빵</h3>")
+	        .append("<p>").append(bread != null ? bread.getBread() : "선택되지 않음").append("</p>")
+	        .append("</div>");
 
-        // 야채 목록
-        html.append("<p><strong>야채:</strong></p>");
-        if (vegetables != null && !vegetables.isEmpty()) {
-            html.append("<ul>");
-            for (VegetableType vegetable : vegetables) {
-                html.append("<li>").append(vegetable.getVegetable()).append("</li>");
-            }
-            html.append("</ul>");
-        } else {
-            html.append("<p>선택되지 않음</p>");
-        }
+	    // 치즈 종류 및 수량
+	    html.append("<div class='section'>")
+	        .append("<h3>🧀 치즈</h3>");
+	    if (cheeses != null && !cheeses.isEmpty()) {
+	        html.append("<ul>");
+	        for (Map.Entry<CheeseType, Integer> entry : cheeses.entrySet()) {
+	            html.append("<li><span class='icon'>🟡</span>")
+	                .append(entry.getKey().getCheese())
+	                .append(" - ")
+	                .append(entry.getValue())
+	                .append("장</li>");
+	        }
+	        html.append("</ul>");
+	    } else {
+	        html.append("<p>선택되지 않음</p>");
+	    }
+	    html.append("</div>");
 
-        // 소스 목록
-        html.append("<p><strong>소스:</strong></p>");
-        if (sauces != null && !sauces.isEmpty()) {
-            html.append("<ul>");
-            for (SauceType sauce : sauces) {
-                html.append("<li>").append(sauce.getSauce()).append("</li>");
-            }
-            html.append("</ul>");
-        } else {
-            html.append("<p>선택되지 않음</p>");
-        }
+	    // 야채 목록
+	    html.append("<div class='section'>")
+	        .append("<h3>🥗 야채</h3>");
+	    if (vegetables != null && !vegetables.isEmpty()) {
+	        html.append("<ul>");
+	        for (VegetableType vegetable : vegetables) {
+	            html.append("<li><span class='icon'>🥬</span>").append(vegetable.getVegetable()).append("</li>");
+	        }
+	        html.append("</ul>");
+	    } else {
+	        html.append("<p>선택되지 않음</p>");
+	    }
+	    html.append("</div>");
 
-        html.append("</div>");
+	    // 소스 목록
+	    html.append("<div class='section'>")
+	        .append("<h3>🥣 소스</h3>");
+	    if (sauces != null && !sauces.isEmpty()) {
+	        html.append("<ul>");
+	        for (SauceType sauce : sauces) {
+	            html.append("<li><span class='icon'>🧂</span>").append(sauce.getSauce()).append("</li>");
+	        }
+	        html.append("</ul>");
+	    } else {
+	        html.append("<p>선택되지 않음</p>");
+	    }
+	    html.append("</div>");
 
-        return html.toString();
-    }
+	    // 컨테이너 닫기
+	    html.append("</div>");
+
+	    return html.toString();
+	}
 
 }
