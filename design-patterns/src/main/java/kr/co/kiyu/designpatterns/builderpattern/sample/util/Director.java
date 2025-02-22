@@ -1,7 +1,5 @@
 package kr.co.kiyu.designpatterns.builderpattern.sample.util;
 
-import org.springframework.stereotype.Component;
-
 public class Director {
 
     private Builder builder;

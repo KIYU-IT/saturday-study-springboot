@@ -40,11 +40,13 @@ public class BuilderSampleService {
 
 		director.construct();
 
-        String result = this.htmlBuilder.getResult();
+        String filename = this.htmlBuilder.getResult();
 
-        System.out.println(result + "가 작성되었습니다.");
+        String htmlContent = this.htmlBuilder.getHtmlContent();
 
-        return result;
+        System.out.println(filename + "파일이 작성되었습니다.");
+
+        return htmlContent;
 	}
 
 	public static void usage() {

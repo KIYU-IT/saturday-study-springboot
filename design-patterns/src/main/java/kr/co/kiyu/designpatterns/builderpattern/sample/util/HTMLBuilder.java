@@ -7,45 +7,64 @@ import org.springframework.stereotype.Component;
 @Component
 public class HTMLBuilder extends Builder {
 
-	private String filename;                                 // 작성할 파일명
+    private String filename;   // 작성할 파일명
+    private PrintWriter writer; // 파일에 쓸 PrintWriter
+    private StringBuilder htmlContent; // 생성된 HTML
 
-    private PrintWriter writer;                               // 파일에 쓸 PrintWriter
+    public HTMLBuilder() {
+        this.htmlContent = new StringBuilder();
+    }
 
-    public void buildTitle(String title) {                       // HTML 파일의 타이틀
-        filename = title + ".html";                           // 타이틀을 기초로 파일명을 결정
+    public void buildTitle(String title) {
+        filename = title + ".html";
 
         try {
-            writer = new PrintWriter(new FileWriter(filename)); // PrintWriter을 만든다
+            writer = new PrintWriter(new FileWriter(filename));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        writer.println("<html><head><title>" + title + "</title></head><body>");
-								// 타이틀 출력
+        String titleTag = "<html><head><title>" + title + "</title></head><body>";
+        
+        writer.println(titleTag);
         writer.println("<h1>" + title + "</h1>");
+
+        htmlContent.append(titleTag).append("\n");
+        htmlContent.append("<h1>").append(title).append("</h1>\n");
     }
 
-    public void buildString(String str) {                        // HTML 파일에서의 문자열
-        writer.println("<p>" + str + "</p>");                   // <p> 태그로 출력
+    public void buildString(String str) {
+        String paragraph = "<p>" + str + "</p>";
+        writer.println(paragraph);
+        htmlContent.append(paragraph).append("\n");
     }
 
-    public void buildItems(String[] items) {                     // HTML 파일에서의 개별항목
-        writer.println("<ul>");                                 // <ul>과 <li>로 출력
+    public void buildItems(String[] items) {
+        writer.println("<ul>");
+        htmlContent.append("<ul>\n");
 
-        for (int i = 0; i < items.length; i++) {
-            writer.println("<li>" + items[i] + "</li>");
+        for (String item : items) {
+            String listItem = "<li>" + item + "</li>";
+            writer.println(listItem);
+            htmlContent.append(listItem).append("\n");
         }
 
         writer.println("</ul>");
+        htmlContent.append("</ul>\n");
     }
 
-    public void buildDone() {                                 // 문서의 완성
-        writer.println("</body></html>");                     // 태그를 닫는다
-        writer.close();                                        // 파일을 닫는다
+    public void buildDone() {
+        writer.println("</body></html>");
+        writer.close();
+
+        htmlContent.append("</body></html>\n");
     }
 
     public String getResult() {
-        return filename;                                      // 파일명을 반환한다
+        return filename; // 기존과 동일하게 파일명 반환
     }
 
+    public String getHtmlContent() {
+        return htmlContent.toString(); // HTML 문자열 반환
+    }
 }
