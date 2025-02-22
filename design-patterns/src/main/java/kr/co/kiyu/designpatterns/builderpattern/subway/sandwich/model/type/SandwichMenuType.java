@@ -1,4 +1,4 @@
-package kr.co.kiyu.designpatterns.builderpattern.subway.v2.model.type;
+package kr.co.kiyu.designpatterns.builderpattern.subway.sandwich.model.type;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

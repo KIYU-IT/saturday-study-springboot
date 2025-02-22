@@ -1,14 +1,14 @@
-package kr.co.kiyu.designpatterns.builderpattern.subway.v2.model.dto;
+package kr.co.kiyu.designpatterns.builderpattern.subway.sandwich.model.dto;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import kr.co.kiyu.designpatterns.builderpattern.subway.v2.model.type.BreadType;
-import kr.co.kiyu.designpatterns.builderpattern.subway.v2.model.type.CheeseType;
-import kr.co.kiyu.designpatterns.builderpattern.subway.v2.model.type.SauceType;
-import kr.co.kiyu.designpatterns.builderpattern.subway.v2.model.type.VegetableType;
+import kr.co.kiyu.designpatterns.builderpattern.subway.sandwich.model.type.BreadType;
+import kr.co.kiyu.designpatterns.builderpattern.subway.sandwich.model.type.CheeseType;
+import kr.co.kiyu.designpatterns.builderpattern.subway.sandwich.model.type.SauceType;
+import kr.co.kiyu.designpatterns.builderpattern.subway.sandwich.model.type.VegetableType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
