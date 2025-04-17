@@ -20,7 +20,8 @@ public enum SauceType {
     OLIVE_OIL("올리브 오일"),
     RED_WINE_VINEGAR("레드와인 식초"),
     SALT("소금"),
-    PEPPER("후추");
+    PEPPER("후추"),
+    BBQ("바비큐 소스");
 
     @Getter
     private final String sauce;

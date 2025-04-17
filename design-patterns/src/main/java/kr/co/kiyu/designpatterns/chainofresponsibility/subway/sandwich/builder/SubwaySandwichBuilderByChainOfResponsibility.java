@@ -91,6 +91,8 @@ public class SubwaySandwichBuilderByChainOfResponsibility implements SandwichBui
 
         log.info("✅ 샌드위치 조립 완료: {}", sandwich.toTextSummary());
 
+        commandQueue.clear();
+
         return sandwich;
     }
 

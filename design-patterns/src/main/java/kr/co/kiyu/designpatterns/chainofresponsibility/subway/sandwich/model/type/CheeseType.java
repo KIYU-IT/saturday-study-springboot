@@ -14,7 +14,8 @@ public enum CheeseType {
 
 	AMERICAN_CHEESE("아메리칸 치즈"),
     SHREDDED_CHEESE("슈레드 치즈"),
-    MOZZARELLA_CHEESE("모짜렐라 치즈");
+    MOZZARELLA_CHEESE("모짜렐라 치즈"),
+    CHEDDAR("체다 치즈");
 
     @Getter
 	private String cheese;
