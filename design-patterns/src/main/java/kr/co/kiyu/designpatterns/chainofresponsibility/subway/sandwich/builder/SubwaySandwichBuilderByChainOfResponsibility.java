@@ -35,6 +35,8 @@ import java.util.*;
 @Component
 public class SubwaySandwichBuilderByChainOfResponsibility implements SandwichBuilderByChainOfResponsibility {
 
+    // Spring의 의존성 주입(DI)은 타입 기반 + 이름 기반으로 작동하므로 ex: @Component("breadHandler")로 등록된 Bean을 찾아서 주입,
+    // @Qualifier("breadHandler")로 이름을 명시적으로 지정하여 주입 또한 가능
     private final SandwichHandler breadHandler;
     private final SandwichHandler cheeseHandler;
     private final SandwichHandler vegetableHandler;
