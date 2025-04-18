@@ -97,4 +97,20 @@ public class SubwaySandwichBuilderByChainOfResponsibility implements SandwichBui
         return sandwich;
     }
 
+    public SandwichHandler getBreadHandler() {
+        return breadHandler;
+    }
+
+    public SandwichHandler getCheeseHandler() {
+        return cheeseHandler;
+    }
+
+    public SandwichHandler getVegetableHandler() {
+        return vegetableHandler;
+    }
+
+    public SandwichHandler getSauceHandler() {
+        return sauceHandler;
+    }
+
 }

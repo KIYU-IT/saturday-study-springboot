@@ -31,14 +31,24 @@ public class SandwichOrderHandler extends OrderHandler {
     protected void process(OrderContext context) {
         log.info("🥪 샌드위치 준비 시작 - 메뉴명: {}", context.getMenuName());
 
-        switch (context.getMenuName()) {
-            case "CHICKEN_TERIYAKI_SET" -> context.setSandwich(director.buildChickenTeriyaki(builder));
-            case "SPICY_ITALIAN_SET" -> context.setSandwich(director.buildSpicyItalian(builder));
-            case "VEGGIE_DELIGHT_SET" -> context.setSandwich(director.buildVeggieDelight(builder));
-            case "SHRIMP_SET" -> context.setSandwich(director.buildShrimp(builder));
-            case "BBQ_PULLED_PORK_SET" -> context.setSandwich(director.buildPulledPorkBBQ(builder));
-            default -> throw new IllegalArgumentException("지원하지 않는 메뉴: " + context.getMenuName());
-        }
+        SubwaySandwichBuilderByChainOfResponsibility newBuilder =
+            new SubwaySandwichBuilderByChainOfResponsibility(
+                builder.getBreadHandler(),
+                builder.getCheeseHandler(),
+                builder.getVegetableHandler(),
+                builder.getSauceHandler()
+            );
+
+        context.setSandwich(
+            switch (context.getMenuName()) {
+                case "CHICKEN_TERIYAKI_SET" -> director.buildChickenTeriyaki(newBuilder);
+                case "SPICY_ITALIAN_SET" -> director.buildSpicyItalian(newBuilder);
+                case "VEGGIE_DELIGHT_SET" -> director.buildVeggieDelight(newBuilder);
+                case "SHRIMP_SET" -> director.buildShrimp(newBuilder);
+                case "BBQ_PULLED_PORK_SET" -> director.buildPulledPorkBBQ(newBuilder);
+                default -> throw new IllegalArgumentException("지원하지 않는 메뉴: " + context.getMenuName());
+            }
+        );
 
         log.info("✅ 샌드위치 준비 완료: {}", context.getSandwich().toTextSummary());
     }

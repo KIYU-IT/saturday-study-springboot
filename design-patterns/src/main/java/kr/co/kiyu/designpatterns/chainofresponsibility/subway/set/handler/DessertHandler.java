@@ -20,8 +20,9 @@ import kr.co.kiyu.designpatterns.chainofresponsibility.subway.set.model.type.Des
 @Component("dessertHandler")
 public class DessertHandler extends OrderHandler {
 
-    @Override
+	@Override
     protected void process(OrderContext context) {
+        // 메뉴에 SNACK 키워드가 있으면 스낵, 아니면 쿠키로 결정
         DessertType dessert = context.getMenuName().contains("SNACK")
                 ? DessertType.CHEESEBALL_SNACK
                 : DessertType.DOUBLE_CHOCOLATE_COOKIE;

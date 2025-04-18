@@ -21,8 +21,11 @@ public class DrinkHandler extends OrderHandler {
 
     @Override
     protected void process(OrderContext context) {
-        DrinkType drink = DrinkType.COKE;
+        log.info("🥤 음료 준비 시작...");
 
+        try { Thread.sleep(300); } catch (InterruptedException ignored) {}
+
+        DrinkType drink = DrinkType.COKE;
         context.setDrink(drink);
 
         log.info("🥤 음료 제공 완료: {}", drink.getDrink());

@@ -38,4 +38,16 @@ public class SubwaySetOrderByChainOfResponsibility {
         return service.buildSet(new SetOrderCommand("SPICY_ITALIAN_SET"));
     }
 
+    @Operation(summary = "세트 주문 (비동기) - 치킨데리야끼", description = "치킨데리야끼 세트를 병렬로 조립")
+    @GetMapping("/order/async/chickenTeriyaki")
+    public String asyncChickenTeriyaki(HttpServletRequest request) {
+        return service.buildSetAsync(new SetOrderCommand("CHICKEN_TERIYAKI_SET"));
+    }
+
+    @Operation(summary = "세트 주문 (비동기) - 스파이시 이탈리안", description = "스파이시 이탈리안 세트를 병렬로 조립")
+    @GetMapping("/order/async/spicyItalian")
+    public String asyncSpicyItalian(HttpServletRequest request) {
+        return service.buildSetAsync(new SetOrderCommand("SPICY_ITALIAN_SET"));
+    }
+
 }

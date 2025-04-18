@@ -9,6 +9,8 @@ import kr.co.kiyu.designpatterns.chainofresponsibility.subway.set.handler.Desser
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,6 +31,8 @@ public class SubwaySetOrderServiceByChainOfResponsibility {
     private final DessertHandler dessertHandler;
 
     public String buildSet(SetOrderCommand command) {
+    	long start = System.currentTimeMillis();
+
         // 체인 구성
         sandwichHandler.setNext(drinkHandler).setNext(dessertHandler);
 
@@ -40,8 +44,35 @@ public class SubwaySetOrderServiceByChainOfResponsibility {
         log.info("📦 세트 조립 시작 - 메뉴: {}", command.getMenuName());
 
         sandwichHandler.handle(context);
-        
+
         log.info("✅ 세트 조립 완료");
+        log.info("⏱️ [동기] 전체 소요 시간: {}ms", System.currentTimeMillis() - start);
+
+        return toHtml(context);
+    }
+
+    public String buildSetAsync(SetOrderCommand command) {
+    	long start = System.currentTimeMillis();
+
+        // Context 생성
+        OrderContext context = OrderContext.builder()
+                .menuName(command.getMenuName())
+                .build();
+
+        log.info("📦 동시에 세트 조립 시작 - 메뉴: {}", command.getMenuName());
+
+        // 1. 샌드위치는 동기 처리
+        sandwichHandler.handle(context);
+
+        // 2. 음료와 디저트는 병렬 비동기 처리
+        CompletableFuture<Void> drinkFuture = drinkHandler.handleAsync(context);
+        CompletableFuture<Void> dessertFuture = dessertHandler.handleAsync(context);
+
+        // 3. 모든 작업이 완료될 때까지 대기
+        CompletableFuture.allOf(drinkFuture, dessertFuture).join();
+
+        log.info("✅ 동시에 세트 조립 완료");
+        log.info("⏱️ [비동기] 전체 소요 시간: {}ms", System.currentTimeMillis() - start);
 
         return toHtml(context);
     }
@@ -52,8 +83,10 @@ public class SubwaySetOrderServiceByChainOfResponsibility {
         html.append("<div style='font-family: Arial; line-height: 1.6;'>")
             .append("<h2>🍱 세트 구성</h2>")
             .append("<p>🥪 샌드위치: ").append(context.getSandwich().toTextSummary()).append("</p>")
-            .append("<p>🥤 음료: ").append(context.getDrink().getDrink()).append("</p>")
-            .append("<p>🍪 디저트: ").append(context.getDessert().getDessert()).append("</p>")
+            .append("<p>🥤 음료: ")
+            .append(context.getDrink() != null ? context.getDrink().getDrink() : "선택되지 않음")
+            .append("<p>🍪 디저트: ")
+            .append(context.getDessert() != null ? context.getDessert().getDessert() : "선택되지 않음")
             .append("</div>");
 
         return html.toString();
