@@ -56,6 +56,25 @@ GET /api/chain/set/classic               # 동기 처리
 GET /api/chain/set/premium-async         # 비동기 처리
 ```
 
+### 3. 🔄 [State Pattern](./state-pattern.md)
+> **객체의 상태에 따라 행동이 달라지는 것을 캡슐화하는 행동 패턴**
+
+**실생활 예제**: 서브웨이 주문 상태 관리
+- 주문 접수 → 조리 중 → 포장 중 → 배달 중 → 완료
+
+**핵심 학습 포인트**:
+- 복잡한 조건문(if-else) 제거
+- 상태별 행동 캡슐화
+- 상태 전환 로직 체계화
+
+**API 엔드포인트**:
+```bash
+POST /api/state/order/sample             # 샘플 주문 생성
+PUT /api/state/order/{id}/next-step      # 다음 단계 진행
+PUT /api/state/order/{id}/cancel         # 주문 취소
+GET /api/state/order/{id}/status         # 상태 조회
+```
+
 ## 🚀 실행 방법
 
 ### 1. 프로젝트 클론 및 실행
@@ -78,6 +97,10 @@ curl -X GET "http://localhost:8080/api/builder/sandwich/chicken-teriyaki"
 # Chain of Responsibility Pattern 테스트  
 curl -X GET "http://localhost:8080/api/chain/set/classic"
 curl -X GET "http://localhost:8080/api/chain/set/premium-async"
+
+# State Pattern 테스트
+curl -X POST "http://localhost:8080/api/state/order/sample"
+curl -X PUT "http://localhost:8080/api/state/order/{orderId}/next-step"
 ```
 
 ### 3. Swagger UI 접속
@@ -94,7 +117,8 @@ saturday-study-springboot/
 ├── docs/                                  # 문서 디렉터리
 │   ├── README.md                          # 프로젝트 개요 (현재 파일)
 │   ├── builder-pattern.md                 # Builder Pattern 문서
-│   └── chain-of-responsibility-pattern.md # Chain of Responsibility Pattern 문서
+│   ├── chain-of-responsibility-pattern.md # Chain of Responsibility Pattern 문서
+│   └── state-pattern.md                   # State Pattern 문서
 └── design-patterns/                       # 메인 모듈
     ├── pom.xml                           # 모듈 Maven 설정
     └── src/main/java/kr/co/kiyu/designpatterns/
@@ -105,10 +129,18 @@ saturday-study-springboot/
         │       ├── builder/              # Builder 구현체들
         │       ├── service/              # 비즈니스 로직
         │       └── order/                # REST 컨트롤러
-        └── chainofresponsibility/        # Chain of Responsibility Pattern 구현
-            └── subway/
-                ├── sandwich/             # 샌드위치 조립 체인
-                └── set/                  # 세트 주문 체인
+                 ├── chainofresponsibility/        # Chain of Responsibility Pattern 구현
+         │   └── subway/
+         │       ├── sandwich/             # 샌드위치 조립 체인
+         │       └── set/                  # 세트 주문 체인
+         └── statepattern/                 # State Pattern 구현
+             └── subway/order/
+                 ├── model/dto/            # 주문 DTO
+                 ├── model/type/           # 상태 열거형
+                 ├── state/                # 상태 클래스들
+                 ├── context/              # 컨텍스트
+                 ├── service/              # 비즈니스 로직
+                 └── order/                # REST 컨트롤러
 ```
 
 ## 🎯 학습 로드맵
@@ -171,4 +203,5 @@ HTML 형태로 주문 결과를 예쁘게 표시
 
 > 💡 **팁**: 각 패턴의 상세한 설명은 해당 패턴의 문서를 참고해주세요!
 > - [Builder Pattern 상세 보기](./builder-pattern.md)
-> - [Chain of Responsibility Pattern 상세 보기](./chain-of-responsibility-pattern.md) 
+> - [Chain of Responsibility Pattern 상세 보기](./chain-of-responsibility-pattern.md)
+> - [State Pattern 상세 보기](./state-pattern.md) 
