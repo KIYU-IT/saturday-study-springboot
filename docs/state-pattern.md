@@ -319,6 +319,209 @@ void testFullOrderLifecycle() {
 - [ ] 새로운 상태 추가 실습 (예: "배달 지연" 상태)
 - [ ] Strategy 패턴과의 차이점 명확히 구분
 
+## ⚖️ 상태 전환 책임 분산 방식 비교
+
+State 패턴에서 **"누가 상태 전환을 담당하는가?"**는 중요한 설계 결정입니다.
+
+### 🎯 1. Context 중심 방식 (전통적)
+
+```java
+// Context가 모든 상태 전환 로직을 관리
+public class OrderContext {
+    public boolean nextStep() {
+        if (currentState.getType() == OrderStateType.RECEIVED) {
+            changeState(new CookingState(), "조리 시작");
+            return true;
+        } else if (currentState.getType() == OrderStateType.COOKING) {
+            changeState(new PackagingState(), "포장 시작");
+            return true;
+        } else if (currentState.getType() == OrderStateType.PACKAGING) {
+            changeState(new DeliveryState(), "배달 시작");
+            return true;
+        }
+        return false;
+    }
+}
+
+// State는 순수하게 행동만 정의
+public class OrderReceivedState implements OrderState {
+    @Override
+    public List<String> getAvailableActions() {
+        return Arrays.asList("조리 시작", "주문 취소");
+    }
+    
+    // 상태 전환 로직 없음 - Context가 모든 전환 결정
+}
+```
+
+### 🎯 2. State 중심 방식 (현재 프로젝트)
+
+```java
+// Context는 상태 교체만 담당
+public class OrderContext {
+    public boolean nextStep() {
+        return currentState.nextStep(this); // 현재 상태에게 위임
+    }
+    
+    public void changeState(OrderState newState, String reason) {
+        this.currentState = newState; // 실제 교체만 수행
+    }
+}
+
+// State가 자신의 다음 상태를 결정하고 전환 실행
+public class OrderReceivedState implements OrderState {
+    @Autowired private CookingState cookingState;
+    
+    @Override
+    public boolean nextStep(OrderContext context) {
+        // 🎯 여기서 상태 전환 책임을 가짐!
+        context.changeState(cookingState, "조리 시작");
+        return true;
+    }
+}
+```
+
+### 🎯 3. 완전 분리 방식 (State Manager)
+
+```java
+// 전환 로직을 별도 클래스에서 관리
+@Component
+public class StateTransitionManager {
+    
+    @Autowired private CookingState cookingState;
+    @Autowired private PackagingState packagingState;
+    
+    public OrderState getNextState(OrderState currentState) {
+        switch (currentState.getType()) {
+            case RECEIVED: return cookingState;
+            case COOKING: return packagingState;
+            // 모든 전환 규칙을 한 곳에 집중
+        }
+        return null;
+    }
+}
+
+public class OrderContext {
+    @Autowired private StateTransitionManager transitionManager;
+    
+    public boolean nextStep() {
+        OrderState nextState = transitionManager.getNextState(currentState);
+        if (nextState != null) {
+            changeState(nextState, "다음 단계 진행");
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+### 📊 4. 방식별 비교 분석
+
+| 구분 | **Context 중심** | **State 중심 (현재)** | **Manager 분리** |
+|------|------------------|----------------------|------------------|
+| **📝 전환 로직 위치** | Context에 집중 | 각 State에 분산 | Manager에 집중 |
+| **🔧 확장성** | ❌ Context 수정 필요 | ✅ 새 State만 추가 | ⚠️ Manager 수정 필요 |
+| **🧪 테스트** | ⚠️ Context 통합 테스트 | ✅ State별 독립 테스트 | ✅ Manager 단위 테스트 |
+| **🔗 결합도** | ✅ State 간 독립적 | ❌ State 간 의존성 | ✅ 완전 분리 |
+| **📚 복잡성** | ⚠️ Context 복잡화 | ✅ 분산으로 단순화 | ⚠️ 추가 클래스 필요 |
+| **🔄 전환 규칙** | 한 곳에 집중 | 여러 곳에 분산 | 한 곳에 집중 |
+
+### 🏆 5. 현재 프로젝트의 State 중심 방식 특징
+
+#### ✅ **장점**
+```java
+// 1. 각 상태의 완전한 캡슐화
+@Component
+public class OrderReceivedState implements OrderState {
+    @Autowired private CookingState cookingState;
+    @Autowired private CancelledState cancelledState;
+    
+    @Override
+    public boolean nextStep(OrderContext context) {
+        // 자신만의 전환 로직 + 비즈니스 로직
+        validateOrderDetails(context.getOrder());
+        notifyKitchen(context.getOrder());
+        context.changeState(cookingState, "조리 시작");
+        return true;
+    }
+}
+
+// 2. 새로운 상태 추가 시 기존 코드 무수정
+@Component
+public class PaymentPendingState implements OrderState {
+    @Autowired private OrderReceivedState orderReceivedState;
+    
+    @Override
+    public boolean nextStep(OrderContext context) {
+        processPayment(context.getOrder());
+        context.changeState(orderReceivedState, "결제 완료");
+        return true;
+    }
+}
+```
+
+#### ⚠️ **단점과 해결책**
+```java
+// 문제 1: 상태 간 순환 의존성 위험
+// 해결: Spring의 지연 초기화 활용
+@Component
+public class OrderReceivedState implements OrderState {
+    @Lazy @Autowired private CookingState cookingState;
+}
+
+// 문제 2: 전환 규칙 파악 어려움
+// 해결: 문서화 + 테스트 코드로 명시
+@Test
+void testStateTransitionFlow() {
+    // RECEIVED → COOKING → PACKAGING → DELIVERY → COMPLETED
+    // 전체 흐름을 테스트로 문서화
+}
+
+// 문제 3: 상태 전환 로직이 분산됨
+// 현재 구현에서는 각 ConcreteState가 전환 책임을 가짐:
+// - OrderReceivedState.nextStep() → CookingState로 전환
+// - CookingState.nextStep() → PackagingState로 전환
+// - PackagingState.nextStep() → DeliveryState로 전환
+```
+
+### 💡 6. 실무 적용 권장사항
+
+#### **간단한 상태 관리**: Context 중심
+```java
+// 상태가 적고 전환 규칙이 단순한 경우
+// 전환 로직이 복잡하지 않은 경우
+enum OrderStatus { PENDING, CONFIRMED, SHIPPED, DELIVERED }
+```
+
+#### **복잡한 워크플로우**: State 중심 (현재 방식)
+```java
+// 각 상태별 복잡한 비즈니스 로직이 있는 경우
+// 상태가 자주 추가/변경되는 경우
+// Spring 환경에서 의존성 주입 활용 가능한 경우
+```
+
+#### **매우 복잡한 전환 규칙**: Manager 분리
+```java
+// 조건부 전환, 병렬 처리, 롤백 등이 필요한 경우
+// 전환 규칙 자체가 중요한 비즈니스 로직인 경우
+// 상태 전환을 외부에서 제어해야 하는 경우
+```
+
+### 🔍 7. 우리 방식의 핵심 인사이트
+
+**"상태 전환을 각 ConcreteState에 분담"**한 것이 맞습니다!
+
+```java
+// 각 상태가 자신의 전환 로직을 소유
+OrderReceivedState → "나는 CookingState로 갈 수 있어!"
+CookingState → "나는 PackagingState로 갈 수 있어!"
+PackagingState → "나는 DeliveryState로 갈 수 있어!"
+
+// 이는 전통적인 Context 중심 방식과는 다른 접근법
+// 장점: 각 상태의 자율성, 확장성
+// 단점: 상태 간 의존성, 전환 규칙 분산
+```
+
 ## 🚀 확장 아이디어
 
 1. **알림 시스템**: 상태 변경 시 고객에게 SMS/푸시 알림
@@ -330,4 +533,5 @@ void testFullOrderLifecycle() {
 ---
 
 > 💡 **핵심 포인트**: State 패턴은 복잡한 상태 관리를 **"각 상태가 스스로 행동하게"** 만드는 패턴입니다. 
+> 우리 구현에서는 **각 상태가 자신의 전환 로직도 책임지는** 방식을 채택했습니다!
 > 상태별 if-else 지옥에서 벗어나 깔끔하고 확장 가능한 코드를 만들어보세요! 
