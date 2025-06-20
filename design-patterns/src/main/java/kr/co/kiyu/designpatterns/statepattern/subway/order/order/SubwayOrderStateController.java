@@ -67,7 +67,7 @@ public class SubwayOrderStateController {
     )
     @PostMapping(value = "/create", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> createOrder(
-            @Parameter(description = "고객명", example = "김지유") @RequestParam String customerName,
+            @Parameter(description = "고객명", example = "홍길동") @RequestParam String customerName,
             @Parameter(description = "메뉴명", example = "치킨 데리야끼") @RequestParam String menuName,
             @Parameter(description = "수량", example = "1") @RequestParam(defaultValue = "1") int quantity,
             @Parameter(description = "총 금액", example = "8500") @RequestParam int totalPrice,
