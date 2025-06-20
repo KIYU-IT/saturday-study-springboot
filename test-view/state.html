@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 State Pattern - 서브웨이 주문 상태 관리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .order-id-section {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .order-id-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .result-area {
+            background: #fff;
+            border: 2px solid #e1e5e9;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .result-area.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #667eea;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quick-actions {
+            background: #e8f4f8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .quick-actions h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .state-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+        }
+
+        .state-item {
+            padding: 10px 15px;
+            background: white;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .tips {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .tips h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .tips ul {
+            color: #856404;
+            padding-left: 20px;
+        }
+
+        .server-status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .server-status.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .order-id-section {
+                flex-direction: column;
+            }
+            
+            .state-flow {
+                flex-direction: column;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 State Pattern</h1>
+            <p>서브웨이 주문 상태 관리 시스템</p>
+        </div>
+
+        <div class="content">
+            <!-- 서버 상태 표시 -->
+            <div id="serverStatus" class="server-status">
+                <p>🔍 서버 연결 상태를 확인 중...</p>
+            </div>
+
+            <!-- 상태 흐름 표시 -->
+            <div class="state-flow">
+                <div class="state-item">🛒 주문 접수</div>
+                <div class="arrow">→</div>
+                <div class="state-item">🍳 조리 중</div>
+                <div class="arrow">→</div>
+                <div class="state-item">📦 포장 중</div>
+                <div class="arrow">→</div>
+                <div class="state-item">🚗 배달 중</div>
+                <div class="arrow">→</div>
+                <div class="state-item">✅ 완료</div>
+            </div>
+
+            <!-- 1. 주문 생성 섹션 -->
+            <div class="section">
+                <h2>📝 1. 주문 생성</h2>
+                
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="createSampleOrder()">
+                        🎯 샘플 주문 생성
+                    </button>
+                    <button class="btn btn-info" onclick="toggleCustomForm()">
+                        ✏️ 커스텀 주문 만들기
+                    </button>
+                </div>
+
+                <!-- 커스텀 주문 폼 -->
+                <div id="customOrderForm" style="display: none;">
+                    <h4>커스텀 주문 정보</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div class="form-group">
+                            <label>고객명</label>
+                            <input type="text" id="customerName" value="김지유" placeholder="고객명을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label>메뉴명</label>
+                            <input type="text" id="menuName" value="치킨 데리야끼" placeholder="메뉴명을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label>수량</label>
+                            <input type="number" id="quantity" value="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>총 금액</label>
+                            <input type="number" id="totalPrice" value="8500" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>배달 주소</label>
+                        <input type="text" id="deliveryAddress" value="서울시 강남구 테헤란로 123" placeholder="배달 주소를 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label>연락처</label>
+                        <input type="text" id="phoneNumber" value="010-1234-5678" placeholder="연락처를 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label>특별 요청사항</label>
+                        <textarea id="specialRequest" rows="3" placeholder="특별 요청사항이 있으면 입력하세요">피클 빼주세요</textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="createCustomOrder()">
+                        🛒 커스텀 주문 생성
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. 주문 관리 섹션 -->
+            <div class="section">
+                <h2>⚙️ 2. 주문 관리</h2>
+                
+                <div class="order-id-section">
+                    <div class="form-group order-id-input">
+                        <label>주문 ID</label>
+                        <input type="text" id="orderId" placeholder="주문 ID를 입력하세요 (예: ORD-1737623456789)">
+                    </div>
+                    <button class="btn btn-info" onclick="getOrderStatus()">
+                        📋 상태 조회
+                    </button>
+                    <button class="btn btn-info" onclick="getAvailableActions()">
+                        🎯 가능한 액션
+                    </button>
+                </div>
+
+                <div class="quick-actions">
+                    <h4>빠른 액션</h4>
+                    <div class="button-group">
+                        <button class="btn" onclick="nextStep()">
+                            ➡️ 다음 단계 진행
+                        </button>
+                        <button class="btn btn-warning" onclick="cancelOrder()">
+                            🚫 주문 취소
+                        </button>
+                        <button class="btn btn-info" onclick="showGuide()">
+                            📚 사용법 안내
+                        </button>
+                        <button class="btn btn-info" onclick="checkServerStatus()">
+                            🔍 서버 상태 확인
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 결과 표시 섹션 -->
+            <div class="section">
+                <h2>📊 3. 결과</h2>
+                <div id="resultArea" class="result-area">
+                    <p style="color: #666; text-align: center; font-style: italic;">
+                        👆 위에서 기능을 선택하면 결과가 여기에 표시됩니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 사용 팁 -->
+            <div class="tips">
+                <h4>💡 사용 팁</h4>
+                <ul>
+                    <li>먼저 <strong>"서버 상태 확인"</strong>을 클릭하여 API 서버가 실행 중인지 확인하세요</li>
+                    <li><strong>"샘플 주문 생성"</strong>을 클릭하여 주문을 만드세요</li>
+                    <li>응답에서 <strong>주문 ID</strong>를 복사하여 위의 입력창에 붙여넣으세요</li>
+                    <li><strong>"다음 단계 진행"</strong>을 여러 번 클릭하여 상태 변화를 확인하세요</li>
+                    <li>각 상태에서 <strong>"주문 취소"</strong>를 시도해보며 제약사항을 확인하세요</li>
+                    <li><strong>"가능한 액션"</strong>을 확인하여 현재 상태에서 할 수 있는 일들을 파악하세요</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8078/api/state/order';
+        let currentOrderId = '';
+        let isServerRunning = false;
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            showWelcomeMessage();
+            checkServerStatus();
+        });
+
+        // 환영 메시지 표시
+        function showWelcomeMessage() {
+            showResult(`
+                <div style="text-align: center; padding: 40px;">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">🎯 State Pattern 테스트 페이지</h3>
+                    <p style="color: #666; line-height: 1.6;">
+                        이 페이지에서 서브웨이 주문 상태 관리 시스템을 테스트할 수 있습니다.<br><br>
+                        <strong>1단계:</strong> "서버 상태 확인" 버튼을 클릭하세요<br>
+                        <strong>2단계:</strong> "샘플 주문 생성" 버튼을 클릭하세요<br>
+                        <strong>3단계:</strong> 주문 ID가 자동으로 입력됩니다<br>
+                        <strong>4단계:</strong> "다음 단계 진행"을 여러 번 클릭하여 상태 변화를 확인하세요<br><br>
+                        <em>💡 각 상태에서 취소를 시도해보며 State 패턴의 특징을 체험해보세요!</em>
+                    </p>
+                </div>
+            `);
+        }
+
+        // 서버 상태 확인
+        async function checkServerStatus() {
+            const statusDiv = document.getElementById('serverStatus');
+            statusDiv.innerHTML = '<p>🔍 서버 연결 상태를 확인 중...</p>';
+            statusDiv.className = 'server-status';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/guide`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'text/html'
+                    }
+                });
+
+                if (response.ok) {
+                    isServerRunning = true;
+                    statusDiv.innerHTML = '<p>✅ 서버가 정상적으로 실행 중입니다! (포트: 8078)</p>';
+                    statusDiv.className = 'server-status';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                isServerRunning = false;
+                statusDiv.innerHTML = `
+                    <p>❌ 서버에 연결할 수 없습니다.</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">
+                        <strong>해결 방법:</strong><br>
+                        1. Spring Boot 애플리케이션이 실행 중인지 확인하세요<br>
+                        2. 포트 8078이 사용 중인지 확인하세요<br>
+                        3. 터미널에서 <code>cd design-patterns && mvn spring-boot:run</code> 실행
+                    </p>
+                `;
+                statusDiv.className = 'server-status error';
+                
+                showResult(`
+                    <div style="text-align: center; padding: 40px; color: #e74c3c;">
+                        <h3>⚠️ 서버 연결 실패</h3>
+                        <p>Spring Boot 애플리케이션이 실행되지 않았습니다.</p>
+                        <p style="margin-top: 20px; font-size: 0.9em;">
+                            터미널에서 다음 명령을 실행하세요:<br>
+                            <code style="background: #f8f9fa; padding: 5px 10px; border-radius: 5px;">
+                                cd design-patterns && mvn spring-boot:run
+                            </code>
+                        </p>
+                    </div>
+                `, true);
+            }
+        }
+
+        // 로딩 표시
+        function showLoading() {
+            const resultArea = document.getElementById('resultArea');
+            resultArea.innerHTML = '<div class="loading-spinner"></div>Loading...';
+            resultArea.className = 'result-area loading';
+        }
+
+        // 결과 표시
+        function showResult(html, isError = false) {
+            const resultArea = document.getElementById('resultArea');
+            resultArea.className = 'result-area';
+            
+            if (isError) {
+                resultArea.innerHTML = `<div style="color: #e74c3c; font-weight: bold;">❌ ${html}</div>`;
+            } else {
+                resultArea.innerHTML = html;
+            }
+        }
+
+        // 서버 상태 확인 후 API 호출
+        function checkServerBeforeCall(callback) {
+            if (!isServerRunning) {
+                showResult('❌ 서버가 실행되지 않았습니다. "서버 상태 확인" 버튼을 먼저 클릭하세요.', true);
+                return false;
+            }
+            return callback();
+        }
+
+        // API 호출 공통 함수
+        async function callAPI(url, method = 'GET', body = null) {
+            showLoading();
+            
+            try {
+                const options = {
+                    method: method,
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'text/html'
+                    }
+                };
+                
+                if (body) {
+                    if (body instanceof URLSearchParams) {
+                        options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                        options.body = body;
+                    } else {
+                        options.headers['Content-Type'] = 'application/json';
+                        options.body = JSON.stringify(body);
+                    }
+                }
+                
+                const response = await fetch(url, options);
+                const result = await response.text();
+                
+                if (response.ok) {
+                    showResult(result);
+                    
+                    // 주문 ID 자동 추출
+                    const orderIdMatch = result.match(/주문번호:\s*(ORD-\d+)/);
+                    if (orderIdMatch) {
+                        currentOrderId = orderIdMatch[1];
+                        document.getElementById('orderId').value = currentOrderId;
+                    }
+                } else {
+                    showResult(`서버 오류: ${response.status} - ${result}`, true);
+                }
+            } catch (error) {
+                showResult(`네트워크 오류: ${error.message}<br><br>
+                    <strong>해결 방법:</strong><br>
+                    1. Spring Boot 애플리케이션이 실행 중인지 확인<br>
+                    2. 포트 8078이 열려있는지 확인<br>
+                    3. CORS 설정이 올바른지 확인`, true);
+            }
+        }
+
+        // 1. 샘플 주문 생성
+        function createSampleOrder() {
+            checkServerBeforeCall(() => callAPI(`${API_BASE_URL}/sample`, 'POST'));
+        }
+
+        // 2. 커스텀 주문 폼 토글
+        function toggleCustomForm() {
+            const form = document.getElementById('customOrderForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 3. 커스텀 주문 생성
+        function createCustomOrder() {
+            if (!checkServerBeforeCall(() => true)) return;
+
+            const formData = new URLSearchParams();
+            formData.append('customerName', document.getElementById('customerName').value);
+            formData.append('menuName', document.getElementById('menuName').value);
+            formData.append('quantity', document.getElementById('quantity').value);
+            formData.append('totalPrice', document.getElementById('totalPrice').value);
+            formData.append('deliveryAddress', document.getElementById('deliveryAddress').value);
+            formData.append('phoneNumber', document.getElementById('phoneNumber').value);
+            formData.append('specialRequest', document.getElementById('specialRequest').value);
+
+            callAPI(`${API_BASE_URL}/create`, 'POST', formData);
+        }
+
+        // 4. 다음 단계 진행
+        function nextStep() {
+            const orderId = document.getElementById('orderId').value.trim();
+            if (!orderId) {
+                showResult('주문 ID를 입력해주세요.', true);
+                return;
+            }
+            
+            checkServerBeforeCall(() => callAPI(`${API_BASE_URL}/${orderId}/next-step`, 'PUT'));
+        }
+
+        // 5. 주문 취소
+        function cancelOrder() {
+            const orderId = document.getElementById('orderId').value.trim();
+            if (!orderId) {
+                showResult('주문 ID를 입력해주세요.', true);
+                return;
+            }
+            
+            checkServerBeforeCall(() => callAPI(`${API_BASE_URL}/${orderId}/cancel`, 'PUT'));
+        }
+
+        // 6. 주문 상태 조회
+        function getOrderStatus() {
+            const orderId = document.getElementById('orderId').value.trim();
+            if (!orderId) {
+                showResult('주문 ID를 입력해주세요.', true);
+                return;
+            }
+            
+            checkServerBeforeCall(() => callAPI(`${API_BASE_URL}/${orderId}/status`));
+        }
+
+        // 7. 가능한 액션 조회
+        function getAvailableActions() {
+            const orderId = document.getElementById('orderId').value.trim();
+            if (!orderId) {
+                showResult('주문 ID를 입력해주세요.', true);
+                return;
+            }
+            
+            checkServerBeforeCall(() => callAPI(`${API_BASE_URL}/${orderId}/actions`));
+        }
+
+        // 8. 사용법 안내
+        function showGuide() {
+            checkServerBeforeCall(() => callAPI(`${API_BASE_URL}/guide`));
+        }
+
+        // 엔터키 이벤트 처리
+        document.getElementById('orderId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getOrderStatus();
+            }
+        });
+    </script>
+</body>
+</html>
