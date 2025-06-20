@@ -1,0 +1,132 @@
+{
+  "rules": [
+    "디자인 패턴 예제 프로젝트의 개발 가이드라인을 항상 준수한다.",
+    "모든 클래스에 JavaDoc 주석을 작성하며, @author KIYU-IT와 @date 태그를 포함한다.",
+    "서브웨이 주문 시스템을 기반으로 한 실생활 예제를 사용한다.",
+    "새로운 패턴 추가 시 /docs/{패턴명}.md 문서를 반드시 작성한다.",
+    "패턴별로 REST API 엔드포인트와 Swagger 문서화를 제공한다.",
+    "HTML 형태의 시각적 출력을 제공한다.",
+    "Spring Boot의 @Component, @Service, @RestController 어노테이션을 적절히 사용한다.",
+    "Lombok을 활용하여 보일러플레이트 코드를 최소화한다.",
+    "항상 한국어로 응답한다."
+  ],
+  "include": [
+    "**/*.java",
+    "**/*.md",
+    "**/*.yml",
+    "**/*.yaml",
+    "**/*.xml",
+    "**/*.json",
+    "**/*.properties"
+  ],
+  "exclude": [
+    "**/target/**",
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.idea/**",
+    "**/*.class",
+    "**/*.jar",
+    "**/*.war",
+    "**/logs/**",
+    "**/.DS_Store",
+    "**/Thumbs.db"
+  ],
+  "languageServerConfig": {
+    "java": {
+      "enabled": true,
+      "formatOnSave": true,
+      "organizeImportsOnSave": true
+    }
+  },
+  "projectSettings": {
+    "name": "토요스터디 - 디자인 패턴 예제",
+    "description": "Spring Boot 기반 디자인 패턴 학습 프로젝트",
+    "mainLanguage": "java",
+    "framework": "Spring Boot",
+    "buildTool": "Maven",
+    "javaVersion": "17"
+  },
+  "codeStyle": {
+    "java": {
+      "indentSize": 4,
+      "tabSize": 4,
+      "useSpaces": true,
+      "maxLineLength": 120,
+      "importOrder": [
+        "java",
+        "javax",
+        "",
+        "org.springframework",
+        "",
+        "kr.co.kiyu",
+        "",
+        "*"
+      ]
+    }
+  },
+  "templates": {
+    "javaClass": {
+      "header": [
+        "/**",
+        " * {description}",
+        " *",
+        " * @author KIYU-IT",
+        " * @date {date}",
+        " */"
+      ]
+    },
+    "designPattern": {
+      "packageStructure": [
+        "model/dto/",
+        "model/type/",
+        "builder/",
+        "handler/",
+        "command/",
+        "service/",
+        "order/"
+      ]
+    }
+  },
+  "shortcuts": {
+    "createPatternDoc": "Ctrl+Shift+D",
+    "generateJavaDoc": "Ctrl+Shift+J",
+    "runSpringBoot": "Ctrl+Shift+R"
+  },
+  "suggestions": {
+    "enableAutoComplete": true,
+    "enableContextualSuggestions": true,
+    "focusOn": [
+      "디자인 패턴 구현",
+      "Spring Boot 기능",
+      "REST API 설계",
+      "JavaDoc 작성",
+      "서브웨이 도메인 로직"
+    ]
+  },
+  "fileWatcher": {
+    "autoReload": true,
+    "watchPatterns": [
+      "**/*.java",
+      "**/*.yml",
+      "**/*.xml"
+    ]
+  },
+  "debugger": {
+    "springBoot": {
+      "enabled": true,
+      "port": 8080,
+      "profiles": ["dev"]
+    }
+  },
+  "documentation": {
+    "autoGenerateApiDocs": true,
+    "swaggerEnabled": true,
+    "markdownLinting": true
+  },
+  "quality": {
+    "enableLinting": true,
+    "enableFormatting": true,
+    "enforceCodeStyle": true,
+    "checkPatternCompliance": true
+  }
+} 
