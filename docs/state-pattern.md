@@ -1,18 +1,219 @@
 # 🔄 State Pattern (상태 패턴)
 
-## 📖 패턴 개요
+## 📖 패턴 정의
 
-State Pattern은 **객체의 상태에 따라 행동이 달라지는 것**을 캡슐화하여, 상태 변화에 따른 복잡한 조건문을 제거하고 각 상태를 독립적인 클래스로 관리하는 행동 패턴입니다.
+**State Pattern**은 **객체의 상태에 따라 행동이 달라지는 것을 캡슐화**하여, 상태 변화에 따른 복잡한 조건문을 제거하고 각 상태를 독립적인 클래스로 관리하는 **"행위" 패턴**입니다.
 
-### 🎯 사용 목적
-- **상태에 따라 객체의 행동이 달라져야 할 때**
-- **복잡한 조건문(if-else, switch)을 제거**하고 싶을 때
-- **상태 전환 로직을 체계적으로 관리**하고 싶을 때
-- **새로운 상태를 쉽게 추가**하고 싶을 때
+---
+
+## 🎯 언제 사용하는가?
+
+### 1. 상태에 따라 객체의 행동이 달라져야 할 때
+
+**전자결재 도메인을 통해 비유하자면:**
+- 만약 결재문서가 **"상신"** 상태라면 이후 처리 가능한 로직은 **"회수", "승인", "반려", "보류"**이다.
+- 만약 결재문서가 **"회수"** 상태라면 이후 처리 가능한 로직은 **"재상신", "삭제"**이다.
+- 만약 결재문서가 **"승인"** 상태라면 이후 처리 가능한 로직은 (다음 결재선의 유무에 따라) **"승인", "반려", "보류"** 혹은 **"완료"**이다.
+
+### 2. 복잡한 조건문(if-else, switch)을 제거하고 싶을 때
+
+위 로직을 if문으로 구현한다고 생각해보면 로직이 매우 복잡해진다는 것을 유추할 수 있다.
+
+### 3. 상태 전환 로직을 체계적으로 관리하고 싶을 때
+
+- 상태마다 전이 가능한 다음 상태와 이벤트(행위)가 명확하게 다를 수 있고, 이 흐름을 Context나 상태 객체 내부에 위임하여 일관되게 처리할 수 있음.
+- **예:** 결재문서가 **"보류"** 상태일 때만 **"재상신"**이 가능하도록 하고 싶다면, 이 로직은 보류 상태 객체 내부에서만 정의되고 외부에서는 신경 쓰지 않아도 됨.
+- 상태 객체들이 각자의 책임을 가지므로 전이 로직이 흩어지지 않고 응집력 있게 유지됨.
+
+### 4. 새로운 상태를 쉽게 추가하고 싶을 때
+
+- 상태 패턴은 각 상태를 클래스(또는 Enum + 구현체)로 캡슐화하므로, 새로운 상태를 추가할 때 기존 코드 수정 없이 클래스 하나만 추가하면 됨.
+- **예:** 결재대기라는 새로운 중간 상태를 도입해야 할 경우, 해당 상태 클래스를 만들고 기존 Context에 등록만 하면 된다.
+- **OCP(개방폐쇄원칙)**에 부합하는 구조.
+
+---
+
+## 🏗️ 상태 패턴에서 핵심 구조별 역할
+
+### Context의 역할
+
+- **현재 상태(State)를 보유**
+- **클라이언트가 호출한 동작을 현재 상태 객체에 위임**
+- **필요시 상태 전환도 직접 수행**
+
+### State의 역할
+
+- **모든 상태에서 가능한 공통 동작의 인터페이스를 정의**
+- **상태별로 가능한 동작 메서드들을 선언함**
+- 어떤 상태에서 어떤 동작이 허용되지 않는다면, 기본 구현으로 예외를 던지거나 no-op으로 처리 가능
+  - **→ 결국 이러한 경우에는 추상 클래스(Abstract Class)의 사용을 고려할 수 있다는 것.**
+- **Context는 구체 상태를 몰라도 이 인터페이스만 사용해 행동 위임 가능**
+
+### ConcreteState의 역할
+
+- **실제 상태별로 다른 동작을 구현:** 각 상태 객체는 자신의 상태에 적절한 동작만 허용하고, 불가능한 행동은 예외 처리
+- **상태에 따라 로직을 다르게 처리:** 필요 시 Context의 상태를 다음 상태로 변경함 (`context.setState(new ...State())`)
+- **상태에 따른 비즈니스 트리거**(옵저버 호출, 이벤트 발행 등)**도 포함 가능**
+
+**↓ 다음 패턴 조합에서 해당 내용 설명 예정**
+
+---
+
+## 🔗 상태 패턴과 같이 쓰면 좋을 패턴 및 아키텍처
+
+### 1. 상태 패턴 + 옵저버 패턴 조합
+
+#### 언제 유용한가...?
+
+- **상태가 바뀌었을 때 외부 객체들에 알림이 필요할 때**
+  - **ex)** 결재문서 상태 변경 시 기안자 및 다음 결재자에게 알림을 전송
+- **상태 변경이 UI, 로그, 외부 시스템 통신 등 다양한 후속 행동을 유발할 때**
+- **결합도는 낮추고, 변화에 민감한 컴포넌트만 분리하여 처리하고 싶을 때**
+
+단일 애플리케이션 내부에서 상태에 따른 후속 처리만 필요할 때는 옵저버 패턴으로 충분하지만...
+
+**↓**
+
+### 2. 상태 패턴 + 이벤트 주도 아키텍처 (EDA)
+
+#### 언제 유용한가...?
+
+- **상태 변화가 다양한 시스템에 영향을 줄 때**
+  - **ex)** 전자결재 시스템에서 승인 완료 시 → 회계 시스템, 통계 시스템, 알림 시스템 등이 각기 다른 프로세스에서 반응해야 할 경우
+- **이벤트 처리 대상이 비동기적이거나 분산되어 있는 경우**
+  - **ex)** 마이크로서비스 구조에서 결재 시스템, 알림 시스템, 통계 시스템이 각각 다른 서비스로 운영될 때
+- **상태 변경 후 확장 가능한 후속 작업이 필요할 때**
+  - **ex)** 알림서비스는 알림만 받고, 결재문서서비스는 데이터를 가공해서 저장하고, 워크플로우서비스는 별도의 워크플로우를 생성
+
+**※ 결국 상태 패턴의 핵심 역할은 "상태에 따른 행위를 어떻게 분기할지"를 캡슐화하는 데에 있으며, 실제 비즈니스 후속 처리는 옵저버 패턴이나 이벤트 주도 아키텍처(EDA)와의 조합을 통해 유연하게 확장할 수 있다.**
+
+**(ConcreteState에서 너무 복잡한 비즈니스 로직이 포함되지 않게 하기 위함) → 단일 책임 원칙(SRP) 유지**
+
+---
+
+## ⚠️ 상태 패턴 사용 시 주의점
+
+### 1. 상태 전환은 ConcreteState에 분담하는 것이 좋다
+
+#### 이유①
+상태 전이의 책임은 해당 상태가 가장 잘 안다. 상태 패턴의 핵심 철학은 **"상태에 따른 행동을 상태 객체가 스스로 결정하도록 위임"**하는 것
+
+즉, 어떤 상태에서 어떤 상태로 전환 가능한지는 현재 상태 자신이 가장 잘 알고 있음
+
+**예:** **"대기 상태"**는 **"결제 대기 상태"**로 갈 수 있지만, **"완료 상태"**는 더 이상 어떤 상태로도 전이되면 안 됨
+
+#### 이유②
+Context가 상태 전이를 직접 관리하면 조건문 지옥 발생 가능
+
+```java
+if (state instanceof DraftState) {
+    this.state = new SubmittedState();
+} else if (state instanceof SubmittedState) {
+    this.state = new ApprovedState();
+}
+```
+
+이처럼 Context가 전이를 관리하면 if-else / switch 지옥이 되어 상태 패턴을 쓰는 의미가 퇴색됨
+
+**"결국 패턴을 썼지만, 다시 로직이 분기문으로 돌아가게 됨"**
+
+#### 이유③
+상태 전이 흐름을 명확하게 캡슐화할 수 있다
+
+상태 간 전이 로직이 ConcreteState 안에 들어 있으면 **"이 상태에서 어디로 갈 수 있는지"**가 코드 구조상 명확하게 드러남
+
+또한 테스트, 디버깅, 확장성 면에서 훨씬 좋음
+
+### 2. ConcreteState에 복잡한 비즈니스 로직을 넣지 않도록 주의해야 한다
+
+#### 이유①
+상태 객체는 **"행동의 분기"**만 담당해야 하며, 구체적인 업무 처리(예: 알림 전송, 로그 저장, 외부 연동 등)는 별도 모듈이나 서비스에 위임하는 것이 좋다
+
+이렇게 해야 상태 객체가 커지지 않고 단일 책임 원칙(SRP)을 지킬 수 있음
+
+#### 이유②
+상태 객체가 모든 후속 로직까지 직접 처리하게 되면 비즈니스 규칙이 상태 클래스 안에 흩어지게 되고, 상태 패턴의 가독성·확장성·재사용성이 급격히 저하됨
+
+### 3. 상태 변경 후 발생하는 후속 처리는 느슨한 결합 방식으로 분리해야 한다
+
+#### 이유①
+상태 전이 이후에 알림, 로깅, 외부 시스템 호출 등 다양한 후속 처리가 발생할 수 있다
+
+이러한 작업은 옵저버 패턴 또는 이벤트 발행(Event-Driven Architecture)으로 분리하는 것이 바람직하다
+
+#### 이유②
+후속 로직을 상태 클래스 내부에서 직접 실행하지 않고 이벤트/알림 방식으로 분리하면 상태 패턴은 **"분기"**라는 본연의 책임에 집중할 수 있고 후속 로직은 독립적으로 진화할 수 있다
+
+**(예: 알림 방식이 이메일 → Slack으로 바뀌더라도 상태 클래스는 변경 없음)**
+
+**(위에 대한 방안으로 옵저버 or EDA와의 조합을 추천)**
+
+---
+
+## 🚨 상태 패턴의 단점 및 한계에 따른 유의점
+
+1. **상태가 많을수록 클래스 수가 폭발적으로 증가** (클래스 수 관리 필요)
+
+2. **모든 상태가 동일한 인터페이스를 강제로 구현해야 하므로 불필요한 메서드 구현이 생기기도 함**
+
+3. **잘못 사용하면 단순한 enum switch만도 못한 복잡도 초래**
+
+4. **테스트 시나리오가 상태마다 매우 달라져서 케이스 분기가 늘어남**
+
+---
+
+## 📊 타 행위 패턴과의 비교
+
+### 상태 패턴 vs 전략 패턴 vs 책임 연쇄 패턴 비교
+
+#### 각 패턴 설명
+
+**1. 상태 패턴 (State Pattern)**
+- 객체의 내부 상태에 따라 행동이 달라져야 할 때 사용
+- 상태는 객체 내부에 명확하게 존재하며, 행동도 그에 따라 변경됨
+- 상태 객체가 상태 전이도 스스로 책임질 수 있음
+- **예:** 결재 문서가 상신 상태일 때는 회수가 가능하지만, 완료 상태일 때는 불가능
+
+**2. 전략 패턴 (Strategy Pattern)**
+- 내부 상태와는 무관하게, 전략(알고리즘)을 런타임에 바꿔서 사용하는 패턴
+- 상태에 따른 제어 흐름은 존재하지 않으며, 다형성을 통해 행동을 바꾸는 것이 목적
+- **예:** 결재 금액 계산 방식이 기본 전략, 특별 할인 전략 등으로 바뀌는 경우
+
+**3. 책임 연쇄 패턴 (Chain of Responsibility)**
+- 요청을 여러 객체가 순차적으로 책임지고 처리할 기회를 가짐
+- 실제 요청을 처리하는 객체는 하나일 수도 있고, 중첩될 수도 있음
+- **예:** 결재 요청이 여러 단계(팀장 → 부장 → 이사)를 거쳐 승인 여부를 판단하는 구조
+
+#### 주요 차이점 요약
+
+| 패턴 | 목적 | 상태 유지 여부 | 전형적인 사용 방식 |
+|------|------|----------------|-------------------|
+| **상태 패턴** | 객체의 상태 변화에 따라 행동 변화 | O | 상태가 객체 내부에 남아 있음 |
+| **전략 패턴** | 실행 알고리즘(전략)을 교체 | X | 실행 방법만 교체, 상태 개념 없음 |
+| **책임 연쇄 패턴** | 요청을 여러 객체가 조건에 따라 처리할 수 있어야 하는가? | X | 여러 후보가 순차적으로 처리 시도 |
+
+#### 요구사항에 따라 목적에 맞는 패턴 선택 필요
+
+```
+요구사항: 객체의 동작이 상황에 따라 달라져야 한다
+├─ Q1. 변화하는 "상태"가 객체 내부에 존재하는가?
+│     ├─ 예 → 상태 패턴 (State Pattern)
+│     │     └─ 상태가 바뀌면 다른 행동을 하도록 캡슐화
+│     └─ 아니오
+│         └─ Q2. 동작 방식(알고리즘)을 외부에서 교체하고 싶은가?
+│               ├─ 예 → 전략 패턴 (Strategy Pattern)
+│               │     └─ 알고리즘을 유연하게 교체
+│               └─ 아니오
+│
+└─ Q3. 요청을 여러 객체가 조건에 따라 처리할 수 있어야 하는가?
+      ├─ 예 → 책임 연쇄 패턴 (Chain of Responsibility)
+      │     └─ 각 객체가 책임을 지고, 처리가 가능하면 중단 or 다음으로 전달
+      └─ 아니오 → 해당 3가지 패턴은 부적절. 단순 조건문 or 다른 구조 고려
+```
+
+---
 
 ## 🛒 실생활 예제: 서브웨이 주문 상태 관리
-
-배달 주문을 할 때의 상태 변화를 생각해보세요:
 
 ### 📱 주문 진행 흐름
 1. **🛒 주문 접수** - 취소 가능, 수정 가능
@@ -22,105 +223,9 @@ State Pattern은 **객체의 상태에 따라 행동이 달라지는 것**을 �
 5. **✅ 완료** - 리뷰 작성, 재주문 가능
 6. **❌ 취소** - 환불 처리 (특정 상태에서만)
 
-**각 상태마다 가능한 행동과 제약사항이 완전히 다릅니다!**
+### 🌐 REST API 사용법
 
-## 🏗️ 구조 및 구현
-
-### 1. State 인터페이스
-```java
-public interface OrderState {
-    boolean nextStep(OrderContext context);     // 다음 단계 진행
-    boolean cancel(OrderContext context);       // 주문 취소
-    List<String> getAvailableActions();         // 가능한 액션 목록
-    String getStatusMessage();                  // 상태 메시지
-    OrderStateType getStateType();              // 상태 타입
-    int getEstimatedMinutes();                  // 예상 완료 시간
-}
-```
-
-### 2. Context (컨텍스트)
-```java
-@Slf4j
-@Getter
-public class OrderContext {
-    private OrderDTO order;                     // 주문 정보
-    private OrderState currentState;            // 현재 상태
-    private List<String> stateHistory;          // 상태 변경 이력
-
-    public boolean nextStep() {
-        return currentState.nextStep(this);
-    }
-
-    public boolean cancel() {
-        return currentState.cancel(this);
-    }
-
-    public void changeState(OrderState newState, String reason) {
-        // 상태 변경 로직
-        this.currentState = newState;
-        this.order.setCurrentState(newState.getStateType());
-        // 로깅 및 이력 관리
-    }
-}
-```
-
-### 3. Concrete States (구체적 상태들)
-
-#### 주문 접수 상태 🛒
-```java
-@Component
-public class OrderReceivedState implements OrderState {
-    
-    @Autowired private CookingState cookingState;
-    @Autowired private CancelledState cancelledState;
-
-    @Override
-    public boolean nextStep(OrderContext context) {
-        context.changeState(cookingState, "조리 시작");
-        return true;
-    }
-
-    @Override
-    public boolean cancel(OrderContext context) {
-        context.changeState(cancelledState, "고객 요청으로 취소");
-        return true; // 접수 단계에서는 취소 가능
-    }
-
-    @Override
-    public List<String> getAvailableActions() {
-        return Arrays.asList("조리 시작", "주문 취소", "주문 수정");
-    }
-}
-```
-
-#### 조리 중 상태 🍳
-```java
-@Component
-public class CookingState implements OrderState {
-    
-    @Autowired private PackagingState packagingState;
-
-    @Override
-    public boolean nextStep(OrderContext context) {
-        context.changeState(packagingState, "조리 완료, 포장 시작");
-        return true;
-    }
-
-    @Override
-    public boolean cancel(OrderContext context) {
-        return false; // 조리 중에는 취소 불가
-    }
-
-    @Override
-    public List<String> getAvailableActions() {
-        return Arrays.asList("포장 시작", "조리 상태 확인");
-    }
-}
-```
-
-## 🌐 REST API 사용법
-
-### 핵심 엔드포인트
+#### 핵심 엔드포인트
 ```bash
 # 1. 샘플 주문 생성
 POST /api/state/order/sample
@@ -138,28 +243,28 @@ GET /api/state/order/{orderId}/status
 GET /api/state/order/{orderId}/actions
 ```
 
-### 사용 시나리오
+#### 사용 시나리오
 ```bash
 # 1. 주문 생성
-curl -X POST "http://localhost:8080/api/state/order/sample"
+curl -X POST "http://localhost:8078/api/state/order/sample"
 # → 응답에서 주문 ID 확인 (예: ORD-1737623456789)
 
 # 2. 상태 진행 (여러 번 호출하여 상태 변화 확인)
-curl -X PUT "http://localhost:8080/api/state/order/ORD-1737623456789/next-step"
+curl -X PUT "http://localhost:8078/api/state/order/ORD-1737623456789/next-step"
 # → 주문 접수 → 조리 중
 
-curl -X PUT "http://localhost:8080/api/state/order/ORD-1737623456789/next-step"
+curl -X PUT "http://localhost:8078/api/state/order/ORD-1737623456789/next-step"
 # → 조리 중 → 포장 중
 
 # 3. 취소 시도 (상태에 따라 결과 다름)
-curl -X PUT "http://localhost:8080/api/state/order/ORD-1737623456789/cancel"
+curl -X PUT "http://localhost:8078/api/state/order/ORD-1737623456789/cancel"
 # → 포장 중 상태에서는 취소 불가!
 
 # 4. 가능한 액션 확인
-curl -X GET "http://localhost:8080/api/state/order/ORD-1737623456789/actions"
+curl -X GET "http://localhost:8078/api/state/order/ORD-1737623456789/actions"
 ```
 
-## 📊 상태별 행동 비교
+### 📊 상태별 행동 비교
 
 | 상태 | 다음 단계 | 취소 가능 | 주요 액션 | 예상 시간 |
 |------|-----------|-----------|-----------|-----------|
@@ -170,368 +275,16 @@ curl -X GET "http://localhost:8080/api/state/order/ORD-1737623456789/actions"
 | **✅ 완료** | - | ❌ | 리뷰, 재주문 | 0분 |
 | **❌ 취소** | - | - | 환불 확인 | 0분 |
 
-## ✅ 패턴의 장점
+---
 
-### 1. **조건문 제거**
-```java
-// Before: 복잡한 조건문
-if (order.getStatus() == OrderStatus.RECEIVED) {
-    if (action.equals("next")) {
-        order.setStatus(OrderStatus.COOKING);
-    } else if (action.equals("cancel")) {
-        order.setStatus(OrderStatus.CANCELLED);
-    }
-} else if (order.getStatus() == OrderStatus.COOKING) {
-    // 더 많은 조건문...
-}
+## 📚 더 알아보기
 
-// After: State 패턴
-context.nextStep(); // 현재 상태가 알아서 처리
-context.cancel();   // 상태별로 다른 동작
-```
-
-### 2. **확장성**
-- 새로운 상태 추가가 쉬움 (예: "배달 지연" 상태)
-- 기존 코드 수정 없이 새로운 행동 추가 가능
-
-### 3. **캡슐화**
-- 각 상태의 로직이 해당 클래스에만 집중
-- 상태 전환 규칙이 명확하게 정의됨
-
-### 4. **테스트 용이성**
-- 각 상태를 독립적으로 테스트 가능
-- Mock 객체 활용이 쉬움
-
-## ❌ 패턴의 단점
-
-### 1. **클래스 수 증가**
-- 상태마다 클래스가 필요
-- 간단한 상태 관리에는 오버스펙
-
-### 2. **복잡성**
-- 상태 간 의존성 관리 필요
-- 순환 참조 위험
-
-### 3. **메모리 사용량**
-- 각 상태 객체가 메모리 점유
-
-## 🔄 다른 패턴과의 관계
-
-### **vs Strategy Pattern**
-- **Strategy**: 알고리즘 교체에 중점
-- **State**: 상태 변화에 따른 행동 변화에 중점
-
-### **vs Command Pattern**
-- **Command**: 요청을 객체로 캡슐화
-- **State**: 상태를 객체로 캡슐화
-
-### **+ Observer Pattern**
-```java
-// 상태 변경 시 옵저버에게 알림
-public void changeState(OrderState newState, String reason) {
-    this.currentState = newState;
-    notifyObservers(newState); // 상태 변화 알림
-}
-```
-
-## 💡 실무 활용 팁
-
-### 1. **Spring 의존성 주입 활용**
-```java
-@Component
-public class OrderReceivedState implements OrderState {
-    @Autowired private CookingState cookingState;
-    @Autowired private CancelledState cancelledState;
-    // 상태 객체들을 Spring이 관리
-}
-```
-
-### 2. **상태 이력 관리**
-```java
-private List<String> stateHistory = new ArrayList<>();
-
-private void addStateHistory(String reason, OrderStateType newState) {
-    String entry = String.format("[%s] %s → %s", 
-            LocalDateTime.now(), reason, newState.getStateName());
-    stateHistory.add(entry);
-}
-```
-
-### 3. **예외 처리**
-```java
-@Override
-public boolean nextStep(OrderContext context) {
-    try {
-        // 상태 전환 로직
-        context.changeState(nextState, "정상 진행");
-        return true;
-    } catch (Exception e) {
-        log.error("상태 전환 실패: {}", e.getMessage());
-        return false;
-    }
-}
-```
-
-### 4. **성능 최적화**
-```java
-// 상태 객체 캐싱
-@Component
-@Scope("singleton") // 싱글톤으로 관리
-public class CookingState implements OrderState {
-    // 상태 객체는 상태를 가지지 않으므로 공유 가능
-}
-```
-
-## 🧪 테스트 방법
-
-### 1. **단위 테스트**
-```java
-@Test
-void testOrderReceivedStateNextStep() {
-    // Given
-    OrderContext context = new OrderContext(order, orderReceivedState);
-    
-    // When
-    boolean result = context.nextStep();
-    
-    // Then
-    assertTrue(result);
-    assertEquals(OrderStateType.COOKING, context.getCurrentStateType());
-}
-```
-
-### 2. **통합 테스트**
-```java
-@Test
-void testFullOrderLifecycle() {
-    // 주문 생성 → 조리 → 포장 → 배달 → 완료
-    // 전체 라이프사이클 테스트
-}
-```
-
-## 📝 학습 체크포인트
-
-- [ ] State 패턴의 핵심 개념 이해 (상태별 행동 캡슐화)
-- [ ] Context의 역할과 상태 전환 메커니즘 파악
-- [ ] 각 상태 클래스의 독립성과 책임 분리 이해
-- [ ] 조건문 제거의 효과 체험
-- [ ] 실제 API를 통한 상태 전환 시나리오 테스트
-- [ ] 새로운 상태 추가 실습 (예: "배달 지연" 상태)
-- [ ] Strategy 패턴과의 차이점 명확히 구분
-
-## ⚖️ 상태 전환 책임 분산 방식 비교
-
-State 패턴에서 **"누가 상태 전환을 담당하는가?"**는 중요한 설계 결정입니다.
-
-### 🎯 1. Context 중심 방식 (전통적)
-
-```java
-// Context가 모든 상태 전환 로직을 관리
-public class OrderContext {
-    public boolean nextStep() {
-        if (currentState.getType() == OrderStateType.RECEIVED) {
-            changeState(new CookingState(), "조리 시작");
-            return true;
-        } else if (currentState.getType() == OrderStateType.COOKING) {
-            changeState(new PackagingState(), "포장 시작");
-            return true;
-        } else if (currentState.getType() == OrderStateType.PACKAGING) {
-            changeState(new DeliveryState(), "배달 시작");
-            return true;
-        }
-        return false;
-    }
-}
-
-// State는 순수하게 행동만 정의
-public class OrderReceivedState implements OrderState {
-    @Override
-    public List<String> getAvailableActions() {
-        return Arrays.asList("조리 시작", "주문 취소");
-    }
-    
-    // 상태 전환 로직 없음 - Context가 모든 전환 결정
-}
-```
-
-### 🎯 2. State 중심 방식 (현재 프로젝트)
-
-```java
-// Context는 상태 교체만 담당
-public class OrderContext {
-    public boolean nextStep() {
-        return currentState.nextStep(this); // 현재 상태에게 위임
-    }
-    
-    public void changeState(OrderState newState, String reason) {
-        this.currentState = newState; // 실제 교체만 수행
-    }
-}
-
-// State가 자신의 다음 상태를 결정하고 전환 실행
-public class OrderReceivedState implements OrderState {
-    @Autowired private CookingState cookingState;
-    
-    @Override
-    public boolean nextStep(OrderContext context) {
-        // 🎯 여기서 상태 전환 책임을 가짐!
-        context.changeState(cookingState, "조리 시작");
-        return true;
-    }
-}
-```
-
-### 🎯 3. 완전 분리 방식 (State Manager)
-
-```java
-// 전환 로직을 별도 클래스에서 관리
-@Component
-public class StateTransitionManager {
-    
-    @Autowired private CookingState cookingState;
-    @Autowired private PackagingState packagingState;
-    
-    public OrderState getNextState(OrderState currentState) {
-        switch (currentState.getType()) {
-            case RECEIVED: return cookingState;
-            case COOKING: return packagingState;
-            // 모든 전환 규칙을 한 곳에 집중
-        }
-        return null;
-    }
-}
-
-public class OrderContext {
-    @Autowired private StateTransitionManager transitionManager;
-    
-    public boolean nextStep() {
-        OrderState nextState = transitionManager.getNextState(currentState);
-        if (nextState != null) {
-            changeState(nextState, "다음 단계 진행");
-            return true;
-        }
-        return false;
-    }
-}
-```
-
-### 📊 4. 방식별 비교 분석
-
-| 구분 | **Context 중심** | **State 중심 (현재)** | **Manager 분리** |
-|------|------------------|----------------------|------------------|
-| **📝 전환 로직 위치** | Context에 집중 | 각 State에 분산 | Manager에 집중 |
-| **🔧 확장성** | ❌ Context 수정 필요 | ✅ 새 State만 추가 | ⚠️ Manager 수정 필요 |
-| **🧪 테스트** | ⚠️ Context 통합 테스트 | ✅ State별 독립 테스트 | ✅ Manager 단위 테스트 |
-| **🔗 결합도** | ✅ State 간 독립적 | ❌ State 간 의존성 | ✅ 완전 분리 |
-| **📚 복잡성** | ⚠️ Context 복잡화 | ✅ 분산으로 단순화 | ⚠️ 추가 클래스 필요 |
-| **🔄 전환 규칙** | 한 곳에 집중 | 여러 곳에 분산 | 한 곳에 집중 |
-
-### 🏆 5. 현재 프로젝트의 State 중심 방식 특징
-
-#### ✅ **장점**
-```java
-// 1. 각 상태의 완전한 캡슐화
-@Component
-public class OrderReceivedState implements OrderState {
-    @Autowired private CookingState cookingState;
-    @Autowired private CancelledState cancelledState;
-    
-    @Override
-    public boolean nextStep(OrderContext context) {
-        // 자신만의 전환 로직 + 비즈니스 로직
-        validateOrderDetails(context.getOrder());
-        notifyKitchen(context.getOrder());
-        context.changeState(cookingState, "조리 시작");
-        return true;
-    }
-}
-
-// 2. 새로운 상태 추가 시 기존 코드 무수정
-@Component
-public class PaymentPendingState implements OrderState {
-    @Autowired private OrderReceivedState orderReceivedState;
-    
-    @Override
-    public boolean nextStep(OrderContext context) {
-        processPayment(context.getOrder());
-        context.changeState(orderReceivedState, "결제 완료");
-        return true;
-    }
-}
-```
-
-#### ⚠️ **단점과 해결책**
-```java
-// 문제 1: 상태 간 순환 의존성 위험
-// 해결: Spring의 지연 초기화 활용
-@Component
-public class OrderReceivedState implements OrderState {
-    @Lazy @Autowired private CookingState cookingState;
-}
-
-// 문제 2: 전환 규칙 파악 어려움
-// 해결: 문서화 + 테스트 코드로 명시
-@Test
-void testStateTransitionFlow() {
-    // RECEIVED → COOKING → PACKAGING → DELIVERY → COMPLETED
-    // 전체 흐름을 테스트로 문서화
-}
-
-// 문제 3: 상태 전환 로직이 분산됨
-// 현재 구현에서는 각 ConcreteState가 전환 책임을 가짐:
-// - OrderReceivedState.nextStep() → CookingState로 전환
-// - CookingState.nextStep() → PackagingState로 전환
-// - PackagingState.nextStep() → DeliveryState로 전환
-```
-
-### 💡 6. 실무 적용 권장사항
-
-#### **간단한 상태 관리**: Context 중심
-```java
-// 상태가 적고 전환 규칙이 단순한 경우
-// 전환 로직이 복잡하지 않은 경우
-enum OrderStatus { PENDING, CONFIRMED, SHIPPED, DELIVERED }
-```
-
-#### **복잡한 워크플로우**: State 중심 (현재 방식)
-```java
-// 각 상태별 복잡한 비즈니스 로직이 있는 경우
-// 상태가 자주 추가/변경되는 경우
-// Spring 환경에서 의존성 주입 활용 가능한 경우
-```
-
-#### **매우 복잡한 전환 규칙**: Manager 분리
-```java
-// 조건부 전환, 병렬 처리, 롤백 등이 필요한 경우
-// 전환 규칙 자체가 중요한 비즈니스 로직인 경우
-// 상태 전환을 외부에서 제어해야 하는 경우
-```
-
-### 🔍 7. 우리 방식의 핵심 인사이트
-
-**"상태 전환을 각 ConcreteState에 분담"**한 것이 맞습니다!
-
-```java
-// 각 상태가 자신의 전환 로직을 소유
-OrderReceivedState → "나는 CookingState로 갈 수 있어!"
-CookingState → "나는 PackagingState로 갈 수 있어!"
-PackagingState → "나는 DeliveryState로 갈 수 있어!"
-
-// 이는 전통적인 Context 중심 방식과는 다른 접근법
-// 장점: 각 상태의 자율성, 확장성
-// 단점: 상태 간 의존성, 전환 규칙 분산
-```
-
-## 🚀 확장 아이디어
-
-1. **알림 시스템**: 상태 변경 시 고객에게 SMS/푸시 알림
-2. **배치 처리**: 특정 시간 후 자동 상태 전환
-3. **롤백**: 이전 상태로 되돌리기 기능
-4. **상태 제한**: 특정 조건에서만 상태 전환 허용
-5. **메트릭스**: 각 상태별 평균 소요 시간 측정
+- [Builder Pattern 문서](./builder-pattern.md)
+- [Chain of Responsibility Pattern 문서](./chain-of-responsibility-pattern.md)
+- [프로젝트 전체 README](../README.md)
 
 ---
 
-> 💡 **핵심 포인트**: State 패턴은 복잡한 상태 관리를 **"각 상태가 스스로 행동하게"** 만드는 패턴입니다. 
-> 우리 구현에서는 **각 상태가 자신의 전환 로직도 책임지는** 방식을 채택했습니다!
-> 상태별 if-else 지옥에서 벗어나 깔끔하고 확장 가능한 코드를 만들어보세요! 
+**🔧 작성자:** KIYU-IT  
+**📅 작성일:** 2025. 1. 25.  
+**📝 마지막 수정:** 2025. 1. 25. 
