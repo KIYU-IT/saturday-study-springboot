@@ -199,3 +199,5 @@ local.properties
 
 # log file
 *.log
+
+.vscode/launch.json
