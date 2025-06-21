@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
  * State 패턴의 Context에서 상태 정보를 관리하기 위해 사용
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 @Schema(description = "서브웨이 주문 정보 DTO")
 @AllArgsConstructor

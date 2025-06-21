@@ -10,7 +10,7 @@ import lombok.Getter;
  * 주문 접수부터 완료까지의 전체 라이프사이클을 정의
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 @Schema(description = "주문 상태 타입")
 public enum OrderStateType {

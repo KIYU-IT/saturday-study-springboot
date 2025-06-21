@@ -14,7 +14,7 @@ import kr.co.kiyu.designpatterns.statepattern.subway.order.model.type.OrderState
  * 상태별로 다른 행동을 수행한다
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 public interface OrderState {
 

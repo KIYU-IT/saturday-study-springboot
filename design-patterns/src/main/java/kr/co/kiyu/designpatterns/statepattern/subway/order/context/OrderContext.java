@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  * 클라이언트는 이 컨텍스트를 통해 주문 상태를 변경하고 조회할 수 있다
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 @Slf4j
 @Getter

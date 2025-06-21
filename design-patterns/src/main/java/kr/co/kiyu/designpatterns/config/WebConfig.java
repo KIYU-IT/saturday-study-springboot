@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 로컬 HTML 파일에서 localhost:8078 API 호출을 허용한다
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {

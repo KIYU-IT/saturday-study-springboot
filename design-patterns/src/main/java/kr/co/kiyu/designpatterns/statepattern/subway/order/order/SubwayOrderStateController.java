@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * - 각 상태별로 다른 행동과 제약사항을 가짐
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 @Tag(name = "State Pattern API", description = "상태 패턴을 활용한 서브웨이 주문 상태 관리 API")
 @Slf4j

@@ -143,7 +143,7 @@ import lombok.extern.slf4j.Slf4j;
  * 5. 상태 전환 규칙이 명확하게 정의됨
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 @Slf4j
 @RequiredArgsConstructor

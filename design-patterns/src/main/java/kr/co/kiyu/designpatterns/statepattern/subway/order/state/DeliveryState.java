@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
  * 이 상태에서는 취소가 불가능하며, 완료 단계로 넘어갈 수 있다
  * 
  * @author KIYU-IT
- * @date 2025. 1. 23.
+ * @date 2025. 6. 20.
  */
 @Slf4j
 @Component
